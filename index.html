@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KnotAI — AI Friendship Bracelet Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav>
+    <a class="nav-logo" href="#">
+      <div class="logo-mark">
+        <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="3.5"/><path d="M10 1.5 Q16 5 16 10 Q16 15 10 18.5"/><path d="M10 1.5 Q4 5 4 10 Q4 15 10 18.5"/></svg>
+      </div>
+      KnotAI
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="#generator">Generate</a>
+      <a class="nav-link" href="#levels">Levels</a>
+      <a class="nav-link" href="#community">Community</a>
+      <a class="nav-link" href="#">Learn</a>
+    </div>
+    <div class="nav-right">
+      <button class="btn-ghost" onclick="openModal()">Sign in</button>
+      <button class="btn-pink" onclick="openModal()">Get started</button>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <div class="hero" style="min-height:480px;">
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero-content">
+      <div class="hero-eyebrow">AI-powered bracelet maker</div>
+      <h1 class="hero-title">Turn any <em>vibe</em> into<br/>a bracelet pattern</h1>
+      <p class="hero-sub">Upload a photo, describe a mood, or pick colors — KnotAI generates a ready-to-make knot chart in seconds.</p>
+      <div class="hero-btns">
+        <button class="btn-hero" onclick="document.getElementById('generator').scrollIntoView({behavior:'smooth'})">Create a pattern</button>
+        <button class="btn-hero-outline" onclick="document.getElementById('community').scrollIntoView({behavior:'smooth'})">See community work</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── KNOT LEGEND BAR ── -->
+  <div class="knot-legend-bar reveal">
+    <div class="knot-legend-item">
+      <div class="knot-legend-bubble" style="background:#f7538a;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>
+        </svg>
+      </div>
+      Forward knot (FK)
+    </div>
+    <div class="knot-legend-item">
+      <div class="knot-legend-bubble" style="background:#c41f62;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="11 6 5 12 11 18"/>
+        </svg>
+      </div>
+      Backward knot (BK)
+    </div>
+    <div class="knot-legend-item">
+      <div class="knot-legend-bubble" style="background:#e8347a;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="5" x2="19" y2="19"/><polyline points="13 19 19 19 19 13"/>
+        </svg>
+      </div>
+      Forward-Backward (FBK)
+    </div>
+    <div class="knot-legend-item">
+      <div class="knot-legend-bubble" style="background:#ff80b3;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="5" x2="5" y2="19"/><polyline points="5 13 5 19 11 19"/>
+        </svg>
+      </div>
+      Backward-Forward (BFK)
+    </div>
+  </div>
+
+  <!-- ── GENERATOR ── -->
+  <section id="generator">
+    <div class="si">
+      <div class="label reveal">AI generator</div>
+      <div class="section-title reveal">Create your pattern</div>
+      <div class="section-sub reveal">Upload a photo for instant color extraction, or describe your vibe and let the AI do the rest.</div>
+      <div class="gen-card reveal">
+
+        <!-- Upload -->
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept="image/*" onchange="handleUpload(event)" />
+          <img id="previewImg" alt="Your photo" />
+          <div class="upload-ph" id="uploadPh">
+            <div class="upload-icon">🌸</div>
+            <div class="upload-t">Drop a photo to extract its vibe</div>
+            <div class="upload-s">Sunsets, flowers, your room — anything · PNG JPG WEBP</div>
+          </div>
+        </div>
+        <div class="vibe-badge" id="vibeBadge">✨ <span id="vibeText"></span></div>
+        <div class="extracted-colors" id="extColors">
+          <span class="exlabel">Colors from photo:</span>
+          <div id="extSwatches"></div>
+        </div>
+
+        <!-- Prompt -->
+        <div style="margin-bottom:1.25rem;">
+          <label class="fl">Describe your bracelet (optional)</label>
+          <textarea class="fta" id="promptInput" placeholder="e.g. cottagecore autumn vibes, or pink and starry nights..."></textarea>
+        </div>
+
+        <!-- Level + Style -->
+        <div class="frow">
+          <div class="field">
+            <label class="fl">Skill level</label>
+            <div class="lv-row" id="lvRow">
+              <button class="lv-btn active" data-lv="1" onclick="setLevel(1,this)">1</button>
+              <button class="lv-btn" data-lv="2" onclick="setLevel(2,this)">2</button>
+              <button class="lv-btn" data-lv="3" onclick="setLevel(3,this)">3</button>
+              <button class="lv-btn" data-lv="4" onclick="setLevel(4,this)">4</button>
+              <button class="lv-btn" data-lv="5" onclick="setLevel(5,this)">5</button>
+            </div>
+            <div class="lv-desc" id="lvDesc">Beginner — 4 strings, forward knots, candy stripe</div>
+          </div>
+          <div class="field">
+            <label class="fl">Pattern style</label>
+            <div class="style-chips" id="styleRow">
+              <button class="sc active" onclick="setSt(this,'Chevron')">Chevron</button>
+              <button class="sc" onclick="setSt(this,'Diamond')">Diamond</button>
+              <button class="sc" onclick="setSt(this,'Wave')">Wave</button>
+              <button class="sc" onclick="setSt(this,'Arrow')">Arrow</button>
+              <button class="sc" onclick="setSt(this,'Heart')">Heart</button>
+              <button class="sc" onclick="setSt(this,'Starburst')">Starburst</button>
+              <button class="sc" onclick="setSt(this,'Alpha')">Alpha / Text</button>
+              <button class="sc" onclick="setSt(this,'Surprise')">Surprise me ✨</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colors -->
+        <div style="margin-bottom:1.5rem;">
+          <label class="fl">Thread colors</label>
+          <div class="color-row" id="colorRow">
+            <div class="csw active" style="background:#f7538a" data-c="#f7538a" onclick="toggleSw(this)"></div>
+            <div class="csw active" style="background:#ffb3d1" data-c="#ffb3d1" onclick="toggleSw(this)"></div>
+            <div class="csw" style="background:#c41f62" data-c="#c41f62" onclick="toggleSw(this)"></div>
+            <div class="csw" style="background:#fff0f6;box-shadow:0 0 0 1px #f0d0dd" data-c="#fff0f6" onclick="toggleSw(this)"></div>
+            <div class="csw" style="background:#534AB7" data-c="#534AB7" onclick="toggleSw(this)"></div>
+            <div class="csw" style="background:#1D9E75" data-c="#1D9E75" onclick="toggleSw(this)"></div>
+            <div class="csw" style="background:#EF9F27" data-c="#EF9F27" onclick="toggleSw(this)"></div>
+            <div class="csw" style="background:#E24B4A" data-c="#E24B4A" onclick="toggleSw(this)"></div>
+            <div class="csw" style="background:#185FA5" data-c="#185FA5" onclick="toggleSw(this)"></div>
+            <div class="csw" style="background:#2C2C2A" data-c="#2C2C2A" onclick="toggleSw(this)"></div>
+            <div class="csw" style="background:#ffffff;box-shadow:0 0 0 1px #f0d0dd" data-c="#ffffff" onclick="toggleSw(this)"></div>
+            <div class="csw" style="background:#888780" data-c="#888780" onclick="toggleSw(this)"></div>
+            <div class="add-sw">+</div>
+          </div>
+        </div>
+
+        <button class="btn-gen" id="genBtn" onclick="generate()">✨ Generate pattern</button>
+        <div class="loading" id="loadingDiv">
+          <div class="spinner"></div>
+          <div class="loading-t" id="loadingT">Weaving your pattern...</div>
+        </div>
+        <div class="pat-out" id="patOut"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ── -->
+  <section id="how">
+    <div class="si">
+      <div class="label reveal">How it works</div>
+      <div class="section-title reveal">From photo to bracelet</div>
+      <div class="how-grid">
+        <div class="how-card reveal"><div class="how-num">01</div><div class="how-t">Upload or describe</div><div class="how-d">Drop any photo — a sunset, your room, a flower — and the AI reads its colors and mood.</div></div>
+        <div class="how-card reveal"><div class="how-num">02</div><div class="how-t">Pick your level</div><div class="how-d">From 4-string beginner candy stripes to 16-string expert alpha art — we adapt the complexity.</div></div>
+        <div class="how-card reveal"><div class="how-num">03</div><div class="how-t">Get your knot chart</div><div class="how-d">A row-by-row knot diagram is generated showing each strand path — forward, backward, and all combinations.</div></div>
+        <div class="how-card reveal"><div class="how-num">04</div><div class="how-t">Make & share</div><div class="how-d">Download a PDF guide, save to your profile, and post your finished bracelet to the community.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── LEVELS ── -->
+  <section id="levels">
+    <div class="si">
+      <div class="label reveal">Skill levels</div>
+      <div class="section-title reveal">Find your starting point</div>
+      <div class="section-sub reveal">Click any level to pre-fill the generator.</div>
+      <div class="lvl-grid" id="lvlGrid"></div>
+    </div>
+  </section>
+
+  <!-- ── COMMUNITY ── -->
+  <section id="community">
+    <div class="si">
+      <div class="label reveal">Community</div>
+      <div class="section-title reveal">Made with KnotAI</div>
+      <div class="section-sub reveal">Real bracelets from AI-generated patterns. <a href="#" style="color:var(--pk5);text-decoration:none">Post yours →</a></div>
+      <div class="tab-row">
+        <div class="tab active" onclick="setTab(this,'trending')">Trending</div>
+        <div class="tab" onclick="setTab(this,'new')">New</div>
+        <div class="tab" onclick="setTab(this,'beginner')">Beginner</div>
+        <div class="tab" onclick="setTab(this,'expert')">Expert</div>
+      </div>
+      <div class="comm-grid" id="commGrid"></div>
+      <div style="text-align:center;margin-top:2rem;">
+        <button class="btn-ghost" style="padding:10px 28px;font-size:14px;">Load more</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div>
+      <div class="ft-brand">KnotAI</div>
+      <div class="ft-copy">AI friendship bracelet patterns — made with 🌸</div>
+    </div>
+    <div class="ft-links">
+      <a class="ft-link" href="#">About</a>
+      <a class="ft-link" href="#">Patterns</a>
+      <a class="ft-link" href="#">Learn</a>
+      <a class="ft-link" href="#">Community</a>
+    </div>
+  </footer>
+
+  <!-- ── MODAL ── -->
+  <div class="overlay" id="modal" onclick="closeModalOutside(event)">
+    <div class="modal">
+      <div class="modal-title">Welcome to KnotAI</div>
+      <div class="modal-sub">Save patterns, post your work, and track your progress.</div>
+      <div class="m-tab-row">
+        <div class="m-tab active" onclick="switchMTab(this,'in')">Sign in</div>
+        <div class="m-tab" onclick="switchMTab(this,'up')">Create account</div>
+      </div>
+      <div class="m-field" id="mName" style="display:none">
+        <label class="m-label">Name</label>
+        <input class="m-input" type="text" placeholder="Your name" />
+      </div>
+      <div class="m-field">
+        <label class="m-label">Email</label>
+        <input class="m-input" type="email" placeholder="you@example.com" />
+      </div>
+      <div class="m-field">
+        <label class="m-label">Password</label>
+        <input class="m-input" type="password" placeholder="••••••••" />
+      </div>
+      <div class="m-btns">
+        <button class="m-cancel" onclick="closeModal()">Cancel</button>
+        <button class="m-submit" id="mSubmit" onclick="closeModal()">Sign in</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/hero.js"></script>
+  <script src="js/bracelet.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
