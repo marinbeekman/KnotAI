@@ -1,5 +1,4 @@
-# KnotAI
-# KnotAI — AI Friendship Bracelet Generator
+# KnotAI — AI Friendship Bracelet Pattern Generator
 
 An AI-powered website that generates friendship bracelet knot patterns from photos, descriptions, or color selections.
 
